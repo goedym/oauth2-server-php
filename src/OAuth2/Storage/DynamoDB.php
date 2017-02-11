@@ -3,6 +3,7 @@
 namespace OAuth2\Storage;
 
 use Aws\DynamoDb\DynamoDbClient;
+use Aws\DynamoDb\Marshaler;
 
 use OAuth2\OpenID\Storage\UserClaimsInterface;
 use OAuth2\OpenID\Storage\AuthorizationCodeInterface as OpenIDAuthorizationCodeInterface;
@@ -173,9 +174,11 @@ class DynamoDB implements
         $clientData = compact('access_token', 'client_id', 'user_id', 'expires', 'scope');
         $clientData = array_filter($clientData, 'self::isNotEmpty');
 
+        $marshaler = new Marshaler();
+
         $result = $this->client->putItem(array(
             'TableName' =>  $this->config['access_token_table'],
-            'Item' => $this->client->formatAttributes($clientData)
+            'Item' => $marshaler->marshalItem($clientData)
         ));
 
         return true;
